@@ -99,6 +99,12 @@ body {
   color: var(--text-color);
 }
 
+/* Prevent iOS Safari zoom on focus (requires font-size >= 16px on inputs) */
+input,
+textarea {
+  font-size: 16px;
+}
+
 #root {
   min-height: 100vh;
   display: flex;
@@ -344,7 +350,7 @@ body {
   border-radius: 999px;
   border: 1px solid var(--border-color);
   padding: 8px 12px;
-  font-size: 14px;
+  font-size: 16px;
   outline: none;
 }
 
