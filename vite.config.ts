@@ -7,28 +7,30 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
+      manifestFilename: "manifest.webmanifest",
       includeAssets: [],
       workbox: {
         navigateFallback: "/index.html"
       },
       manifest: {
-        name: "52 to-do",
-        short_name: "52 to-do",
+        name: "52",
+        short_name: "52",
         description: "Track 52 things you want to complete this year.",
-        theme_color: "#ffffff",
-        background_color: "#ffffff",
+        start_url: "/",
+        scope: "/",
         display: "standalone",
-        start_url: ".",
+        theme_color: "#0f1115",
+        background_color: "#0f1115",
         icons: [
           {
-            src: "icons/pwa-192x192.svg",
+            src: "icons/icon-192.png",
             sizes: "192x192",
-            type: "image/svg+xml"
+            type: "image/png"
           },
           {
-            src: "icons/pwa-512x512.svg",
+            src: "icons/icon-512.png",
             sizes: "512x512",
-            type: "image/svg+xml"
+            type: "image/png"
           }
         ]
       }

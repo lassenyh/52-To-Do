@@ -49,7 +49,18 @@ After deploying, open the site once so the service worker can install.
 1. Open the deployed site in **Safari** on your iPhone.
 2. Tap the **Share** icon in the toolbar.
 3. Choose **Add to Home Screen**.
-4. Confirm the name (for example, `52 to-do`) and tap **Add**.
+4. Confirm the name (e.g. **52**) and tap **Add**.
 
-The app will now appear as an icon on your home screen and open in standalone mode like a native app.
+The app will appear as an icon and open in **standalone** mode (no browser UI).
+
+---
+
+### 6. iOS: Reinstall after PWA / manifest changes
+
+After changing the manifest, icons, or service worker, existing home-screen installs may use cached assets. To get standalone and icons to update:
+
+1. **Remove** the app from the home screen (long-press icon → Remove App → Remove from Home Screen).
+2. In Safari, **hard refresh** the site (or clear Safari cache for the site).
+3. **Add to Home Screen** again (Share → Add to Home Screen).
+4. Open from the home screen; it should now use the new manifest and open in standalone.
 
