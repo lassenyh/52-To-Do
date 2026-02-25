@@ -353,6 +353,7 @@ function App() {
           <form onSubmit={handleAddTask} className="todo-input-row">
             <input
               className="todo-input"
+              style={{ fontSize: 16 }}
               placeholder="Add a new task…"
               value={input}
               onChange={(e) => setInput(e.target.value)}
