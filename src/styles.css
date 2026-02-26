@@ -129,6 +129,7 @@ textarea {
   max-width: 960px;
   margin: 0 auto;
   padding: 24px 16px 48px;
+  padding-top: calc(env(safe-area-inset-top) + 32px);
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -137,6 +138,7 @@ textarea {
 @media (min-width: 768px) {
   .app {
     padding: 40px 24px 64px;
+    padding-top: calc(env(safe-area-inset-top) + 32px);
   }
 }
 
