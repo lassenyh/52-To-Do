@@ -19,6 +19,7 @@
   --ratio-below-color: #dc2626;
   --card-shadow: none;
   --task-completed-bg: rgba(16, 185, 129, 0.08);
+  --subtask-input-bg: rgba(0, 0, 0, 0.03);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -40,6 +41,7 @@
     --ratio-below-color: #ff5a52;
     --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
     --task-completed-bg: rgba(16, 185, 129, 0.12);
+  --subtask-input-bg: rgba(255, 255, 255, 0.05);
   }
 }
 
@@ -62,6 +64,7 @@
   --card-shadow: none;
   --task-completed-bg: rgba(16, 185, 129, 0.08);
   --completed-title-opacity: 0.9;
+  --subtask-input-bg: rgba(0, 0, 0, 0.03);
 }
 
 :root[data-theme="dark"] {
@@ -83,6 +86,7 @@
   --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
   --completed-title-opacity: 0.94;
   --task-completed-bg: rgba(16, 185, 129, 0.12);
+  --subtask-input-bg: rgba(255, 255, 255, 0.05);
 }
 
 *,
@@ -165,25 +169,15 @@ textarea {
   padding: 20px 16px 18px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
 }
 
 .top-bar {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-}
-
-.theme-toggle {
-  border-radius: 999px;
-  border: 1px solid var(--border-color);
-  background-color: transparent;
-  color: var(--muted-text-color);
-  padding: 6px 12px;
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  cursor: pointer;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 @media (min-width: 768px) {
@@ -192,15 +186,147 @@ textarea {
   }
 }
 
+/* 52-week year dots indicator (above stat cards) */
+.year-dots {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.year-dots-grid {
+  display: grid;
+  grid-template-columns: repeat(13, 1fr);
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.year-dots-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  transition: background-color 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  justify-self: center;
+  align-self: center;
+}
+
+/* Pre-join: weeks before user started (clearly visible for sanity check) */
+.year-dots-dot-preJoin,
+.year-dots-dot-prejoin {
+  background-color: var(--muted-text-color);
+  opacity: 0.35;
+}
+
+/* Past within tracking window: dim but clearly visible */
+.year-dots-dot-past {
+  background-color: var(--muted-text-color);
+  opacity: 0.55;
+}
+
+.year-dots-dot-future {
+  background-color: #fff;
+  opacity: 1;
+}
+
+.year-dots-dot-current-on-pace {
+  background-color: #15803d;
+  opacity: 1;
+  box-shadow: 0 0 0 1px rgba(21, 128, 61, 0.4);
+}
+
+.year-dots-dot-current-behind {
+  background-color: var(--ratio-below-color);
+  opacity: 1;
+  box-shadow: 0 0 0 1px rgba(255, 90, 82, 0.35);
+}
+
+:root[data-theme="light"] .year-dots-dot-current-behind,
+:root:not([data-theme="dark"]) .year-dots-dot-current-behind {
+  box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.35);
+}
+
+/* Single pulse when current week status changes (red <-> green) */
+.year-dots-dot-current-pulse {
+  animation: yearDotsPulse 500ms ease-out 0s 1;
+}
+
+/* Intro landing: 3 pulses (scale + subtle glow), ~1050ms total */
+.year-dots-dot-current-pulse.year-dots-dot-intro-pulse {
+  animation: yearDotsPulse3 1050ms ease-out 0s 1;
+}
+
+@keyframes yearDotsPulse {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes yearDotsPulse3 {
+  0%, 20%, 33%, 53%, 66%, 86%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 1px rgba(21, 128, 61, 0.4);
+  }
+  10%, 43%, 76% {
+    transform: scale(1.2);
+    box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.35);
+  }
+}
+
+.year-dots-dot-current-behind.year-dots-dot-intro-pulse {
+  animation: yearDotsPulse3Behind 1050ms ease-out 0s 1;
+}
+
+@keyframes yearDotsPulse3Behind {
+  0%, 20%, 33%, 53%, 66%, 86%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 1px rgba(255, 90, 82, 0.35);
+  }
+  10%, 43%, 76% {
+    transform: scale(1.2);
+    box-shadow: 0 0 0 3px rgba(255, 90, 82, 0.3);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .year-dots-dot {
+    transition: none;
+  }
+  .year-dots-dot-current-pulse,
+  .year-dots-dot-intro-pulse {
+    animation: none;
+  }
+}
+
+.year-dots-weeks-left {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--subtle-text-color);
+  opacity: 0.85;
+  flex-shrink: 0;
+}
+
 .dashboard {
   display: grid;
   grid-template-columns: repeat(1, minmax(0, 1fr));
   gap: 16px;
+  width: 100%;
 }
 
 @media (min-width: 640px) {
   .dashboard {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
   }
 }
 
@@ -278,10 +404,31 @@ textarea {
   color: var(--muted-text-color);
 }
 
+.stat-helper {
+  margin-top: 5px;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: var(--muted-text-color);
+}
+
 .stat-large {
   font-size: 32px;
   font-weight: 700;
   line-height: 1.1;
+}
+
+/* Tasks vs. week card: container for ratio headline responsive typography */
+.stat-card-ratio {
+  container-type: inline-size;
+  container-name: stat-ratio;
+}
+
+.stat-ratio-sentence {
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: clamp(14px, 8cqi, 24px);
 }
 
 .ratio-below {
@@ -333,6 +480,28 @@ textarea {
   animation: pacePulse 600ms ease-out 0s 3;
 }
 
+.todo-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.todo-section-inner {
+  display: flex;
+  flex-direction: column;
+}
+
+.todo-section-inner .todo-input-row {
+  margin-top: 16px;
+}
+
+.todo-section-inner .segment-control {
+  margin-top: 20px;
+}
+
+.todo-section-inner .todo-list {
+  margin-top: 24px;
+}
+
 .todo-section-header {
   display: flex;
   align-items: center;
@@ -364,13 +533,19 @@ textarea {
   min-width: 0;
   border-radius: 999px;
   border: 1px solid var(--border-color);
-  padding: 8px 12px;
-  font-size: 16px;
+  padding: 6px 10px;
+  font-size: 14px;
+  background-color: var(--subtask-input-bg);
   outline: none;
 }
 
 .todo-input:focus {
   border-color: var(--text-color);
+}
+
+.todo-input::placeholder {
+  color: var(--muted-text-color);
+  opacity: 0.85;
 }
 
 .todo-add-btn {
@@ -390,6 +565,51 @@ textarea {
   cursor: default;
 }
 
+.segment-control {
+  display: flex;
+  justify-content: stretch;
+}
+
+.segment-control-inner {
+  display: flex;
+  flex: 1;
+  max-width: 280px;
+  padding: 3px;
+  min-height: 40px;
+  border-radius: 999px;
+  background-color: var(--border-color);
+  border: 1px solid var(--border-color);
+  gap: 0;
+}
+
+.segment-option {
+  flex: 1;
+  padding: 10px 18px;
+  min-height: 40px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 999px;
+  background-color: transparent;
+  color: var(--muted-text-color);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.segment-option:hover {
+  color: var(--text-color);
+}
+
+.segment-option-active {
+  background-color: var(--card-bg-color);
+  color: var(--text-color);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
 .todo-list {
   margin: 0;
   padding: 4px 0 0;
@@ -402,16 +622,236 @@ textarea {
 }
 
 .todo-item {
-  display: flex;
+  display: grid;
+  grid-template-columns: 44px 44px 1fr 160px;
   align-items: center;
   gap: 8px;
+  min-height: 44px;
   padding: 4px 6px;
   border-radius: 10px;
   transition: background-color 150ms ease;
+  box-sizing: border-box;
+}
+
+/* Empty placeholder for chevron column; same dimensions as .todo-expand-btn for identical grid geometry */
+.todo-chevron-slot {
+  display: block;
+  width: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  flex-shrink: 0;
+}
+
+.todo-expand-btn {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted-text-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.todo-expand-btn:hover {
+  color: var(--text-color);
+}
+
+.todo-chevron {
+  font-size: 12px;
+  line-height: 1;
+  transition: transform 150ms ease;
+}
+
+.todo-chevron-open {
+  transform: rotate(90deg);
 }
 
 .todo-item-completed {
   background-color: transparent;
+}
+
+.todo-subtasks {
+  grid-column: 1 / -1;
+  width: 100%;
+  padding-left: 0;
+  padding-top: 6px;
+  padding-bottom: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.todo-sublist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Subtask: same grid as parent so trash icon uses right-side actions column (no offset lane) */
+.todo-subtask-item {
+  padding-left: 0;
+}
+
+/* Desktop: subtask DELETE hover-reveal; space reserved (no layout shift) */
+.todo-subtask-item .todo-actions {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease;
+}
+
+.todo-subtask-item:hover .todo-actions,
+.todo-subtask-item .todo-actions:focus-within {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Mobile / touch: subtask DELETE always visible */
+@media (pointer: coarse), (max-width: 768px) {
+  .todo-subtask-item .todo-actions {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* Subtask: indent checkbox + title block only; wrapper spans checkbox + content columns */
+.todo-subtask-main {
+  grid-column: span 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 20px;
+  min-width: 0;
+}
+
+.todo-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+  min-width: 0;
+  align-self: center;
+}
+
+.todo-subtask-form {
+  display: grid;
+  grid-template-columns: 44px 44px 1fr 160px;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.todo-subtask-input-cell {
+  grid-column: span 2;
+  min-width: 0;
+  padding-left: 20px;
+}
+
+.todo-subtask-input-cell .todo-input {
+  width: 100%;
+}
+
+.todo-add-subtask-btn {
+  flex-shrink: 0;
+  width: 88px;
+  min-width: 88px;
+  max-width: 88px;
+}
+
+/* Subtask ADD button: same width as main Add, slightly smaller text */
+.todo-add-subtask-btn-small {
+  padding: 6px 12px;
+  font-size: 12px;
+  min-height: 32px;
+}
+
+/* Subtask DELETE: trash icon button (not pill); same hover-reveal as .todo-actions */
+.todo-delete-subtask-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  min-width: 32px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--subtle-text-color);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 150ms ease, border-color 150ms ease;
+}
+
+.todo-delete-subtask-btn:hover {
+  color: var(--text-color);
+  border-color: var(--text-color);
+}
+
+.todo-delete-subtask-icon {
+  display: block;
+}
+
+/* Inline "Add subtask" on parent row: small, low emphasis, expands and focuses subtask input */
+.todo-add-subtask-inline {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted-text-color);
+  font-size: 12px;
+  cursor: pointer;
+  transition: opacity 150ms ease, color 150ms ease;
+}
+
+/* Desktop: hide until parent row hover; space is reserved (no layout shift) */
+.todo-item .todo-add-subtask-inline {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.todo-item:hover .todo-add-subtask-inline {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* If parent already has subtasks, never show "Add subtask" hover affordance */
+.todo-item-has-subtasks .todo-add-subtask-inline,
+.todo-item-has-subtasks:hover .todo-add-subtask-inline {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.todo-add-subtask-inline:hover {
+  opacity: 1;
+  color: var(--text-color);
+}
+
+/* Mobile / touch: always visible (no hover) when parent has zero subtasks */
+@media (pointer: coarse), (max-width: 768px) {
+  .todo-item .todo-add-subtask-inline {
+    opacity: 0.75;
+    pointer-events: auto;
+  }
+  .todo-item:hover .todo-add-subtask-inline {
+    opacity: 0.75;
+  }
+  .todo-item-has-subtasks .todo-add-subtask-inline,
+  .todo-item-has-subtasks:hover .todo-add-subtask-inline {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .todo-add-subtask-inline:hover {
+    opacity: 1;
+    color: var(--text-color);
+  }
 }
 
 .todo-item-completed .todo-title {
@@ -488,6 +928,31 @@ textarea {
   gap: 2px;
 }
 
+.todo-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.todo-title-row .todo-title {
+  min-width: 0;
+}
+
+.todo-title-row:has(.subtask-fraction) .todo-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.subtask-fraction {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 500;
+  opacity: 0.65;
+  color: var(--muted-text-color);
+}
+
 .todo-title {
   font-size: 14px;
   line-height: 1.4;
@@ -505,15 +970,24 @@ textarea {
 }
 
 .todo-delete-btn {
+  flex-shrink: 0;
+  width: fit-content;
+  min-width: 4.5em;
+  min-height: 28px;
+  padding: 4px 8px;
   border-radius: 999px;
   border: 1px solid var(--border-color);
   background-color: transparent;
   color: var(--subtle-text-color);
-  padding: 4px 8px;
   font-size: 11px;
+  line-height: 1;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   cursor: pointer;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .todo-delete-btn:hover {
@@ -525,5 +999,93 @@ textarea {
   margin-top: 4px;
   font-size: 13px;
   color: var(--subtle-text-color);
+}
+
+/* Year-end reset modal */
+.year-end-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background-color: rgba(0, 0, 0, 0.6);
+  box-sizing: border-box;
+}
+
+.year-end-modal {
+  width: 100%;
+  max-width: 380px;
+  padding: 24px;
+  border-radius: 12px;
+  background-color: var(--card-bg-color);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border-color);
+}
+
+.year-end-title {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text-color);
+}
+
+.year-end-subtitle {
+  margin: 0 0 12px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--muted-text-color);
+}
+
+.year-end-stats {
+  margin: 0 0 20px;
+  font-size: 13px;
+  color: var(--subtle-text-color);
+}
+
+.year-end-preview-hint {
+  margin: 0 0 16px;
+  font-size: 12px;
+  color: var(--subtle-text-color);
+  font-style: italic;
+}
+
+.year-end-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.year-end-btn {
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 150ms ease;
+  box-sizing: border-box;
+}
+
+.year-end-btn:hover {
+  opacity: 0.9;
+}
+
+.year-end-btn-primary {
+  border: 1px solid var(--button-bg-color);
+  background-color: var(--button-bg-color);
+  color: var(--button-text-color);
+}
+
+.year-end-btn-secondary {
+  border: 1px solid var(--border-color);
+  background-color: transparent;
+  color: var(--muted-text-color);
+}
+
+.year-end-btn-secondary:hover {
+  border-color: var(--text-color);
+  color: var(--text-color);
 }
 
