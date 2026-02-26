@@ -1014,9 +1014,29 @@ textarea {
   color: var(--text-color);
 }
 
-/* Placeholder for subtask form (checkbox-width space on mobile); hidden on desktop */
-.todo-subtask-form-placeholder {
-  display: none;
+/* Inline subtask composer: normal flow, directly under parent row (no overlay) */
+.subtask-composer-row {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  margin: 10px 0 16px;
+  padding-left: 44px;
+  align-items: center;
+  min-width: 0;
+  box-sizing: border-box;
+  grid-column: 1 / -1;
+}
+
+.subtask-composer-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.subtask-composer-add-btn {
+  min-width: 88px;
+  width: auto;
+  flex-shrink: 0;
 }
 
 /* ---------- Mobile task list (max-width: 768px): inline chevron, no Add subtask row, + opens input ---------- */
@@ -1185,44 +1205,11 @@ textarea {
     flex-shrink: 0;
   }
 
-  /* Subtask form: hidden by default; shown only when .todo-subtask-form-mobile-open (after "+" tap) */
-  .todo-subtask-form {
-    display: none;
-    grid-template-columns: unset;
-  }
-
-  .todo-subtask-form.todo-subtask-form-mobile-open {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 8px;
-    margin-top: 6px;
+  /* Inline composer: align under task content on mobile (checkbox + chevron + gap) */
+  .subtask-composer-row {
     padding-left: 16px;
-  }
-
-  .todo-subtask-form.todo-subtask-form-mobile-open .todo-chevron-slot {
-    display: none;
-  }
-
-  .todo-subtask-form-placeholder {
-    display: block;
-    width: 28px;
-    min-width: 28px;
-    flex-shrink: 0;
-  }
-
-  .todo-subtask-form .todo-subtask-input-cell {
-    flex: 1;
-    min-width: 0;
-    padding-left: 0;
-    grid-column: unset;
-  }
-
-  .todo-subtask-form .todo-add-subtask-btn-small {
-    flex-shrink: 0;
-    max-width: 72px;
-    padding: 6px 12px;
-    font-size: 12px;
+    margin-top: 6px;
+    margin-bottom: 12px;
   }
 
   .todo-subtasks {

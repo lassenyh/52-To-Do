@@ -495,8 +495,8 @@ function App() {
   const [taskSegment, setTaskSegment] = useState<"todo" | "completed">("todo");
   const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
   const [subtaskInput, setSubtaskInput] = useState("");
-  /** Mobile only: which parent has the subtask input row visible (after "+" tap). */
-  const [mobileSubtaskInputTaskId, setMobileSubtaskInputTaskId] = useState<string | null>(null);
+  /** Which parent has the subtask composer open (inline row). Only one at a time. */
+  const [activeSubtaskParentId, setActiveSubtaskParentId] = useState<string | null>(null);
   const addSubtaskInputRef = useRef<HTMLInputElement>(null);
   const [joinWeekSnapshot, setJoinWeekSnapshot] = useState<{
     joinWeek: number;
@@ -1128,7 +1128,7 @@ function App() {
                           aria-label={isExpanded ? "Collapse subtasks" : "Expand subtasks"}
                           onClick={() => {
                             setExpandedTaskId((id) => (id === task.id ? null : task.id));
-                            if (expandedTaskId === task.id) setMobileSubtaskInputTaskId((mid) => (mid === task.id ? null : mid));
+                            if (expandedTaskId === task.id) setActiveSubtaskParentId((id) => (id === task.id ? null : id));
                             if (expandedTaskId !== task.id) setSubtaskInput("");
                           }}
                         >
@@ -1179,10 +1179,16 @@ function App() {
                           className="todo-add-subtask-plus-btn"
                           aria-label="Add subtask"
                           onClick={() => {
+                            const isOpen = activeSubtaskParentId === task.id;
+                            setActiveSubtaskParentId(isOpen ? null : task.id);
                             if (!isExpanded) setExpandedTaskId(task.id);
-                            setMobileSubtaskInputTaskId(task.id);
                             setSubtaskInput("");
-                            requestAnimationFrame(() => setTimeout(() => addSubtaskInputRef.current?.focus(), 0));
+                            if (!isOpen) {
+                              requestAnimationFrame(() => {
+                                addSubtaskInputRef.current?.focus();
+                                addSubtaskInputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+                              });
+                            }
                           }}
                         >
                           <span aria-hidden>+</span>
@@ -1209,12 +1215,16 @@ function App() {
                         type="button"
                         className="todo-add-subtask-inline"
                         onClick={() => {
-                          const wasExpanded = isExpanded;
-                          if (!wasExpanded) setExpandedTaskId(task.id);
+                          const isOpen = activeSubtaskParentId === task.id;
+                          if (!isExpanded) setExpandedTaskId(task.id);
+                          setActiveSubtaskParentId(isOpen ? null : task.id);
                           setSubtaskInput("");
-                          const focusInput = () => addSubtaskInputRef.current?.focus();
-                          if (wasExpanded) focusInput();
-                          else requestAnimationFrame(() => setTimeout(focusInput, 0));
+                          if (!isOpen) {
+                            requestAnimationFrame(() => {
+                              addSubtaskInputRef.current?.focus();
+                              addSubtaskInputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+                            });
+                          }
                         }}
                       >
                         Add subtask
@@ -1227,6 +1237,34 @@ function App() {
                         Delete
                       </button>
                     </div>
+
+                    {activeSubtaskParentId === task.id && (
+                      <form
+                        className="subtask-composer-row"
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          handleAddSubtask(task.id, subtaskInput);
+                          setSubtaskInput("");
+                          setActiveSubtaskParentId(null);
+                        }}
+                      >
+                        <input
+                          ref={addSubtaskInputRef}
+                          className="todo-input subtask-composer-input"
+                          placeholder="Add subtask…"
+                          value={subtaskInput}
+                          onChange={(e) => setSubtaskInput(e.target.value)}
+                          aria-label="Add subtask"
+                        />
+                        <button
+                          type="submit"
+                          className="todo-add-btn subtask-composer-add-btn"
+                          disabled={!subtaskInput.trim()}
+                        >
+                          Add
+                        </button>
+                      </form>
+                    )}
 
                     {isExpanded && (
                       <div className="todo-subtasks" style={{ width: "100%" }}>
@@ -1288,37 +1326,6 @@ function App() {
                             </li>
                           ))}
                         </ul>
-                        <form
-                          className={
-                            "todo-subtask-form" +
-                            (mobileSubtaskInputTaskId === task.id ? " todo-subtask-form-mobile-open" : "")
-                          }
-                          onSubmit={(e) => {
-                            e.preventDefault();
-                            handleAddSubtask(task.id, subtaskInput);
-                            setSubtaskInput("");
-                            setMobileSubtaskInputTaskId(null);
-                          }}
-                        >
-                          <span className="todo-chevron-slot" aria-hidden />
-                          <span className="todo-subtask-form-placeholder" aria-hidden />
-                          <div className="todo-subtask-input-cell">
-                            <input
-                              ref={expandedTaskId === task.id ? addSubtaskInputRef : undefined}
-                              className="todo-input todo-subtask-input"
-                              placeholder="Add subtask…"
-                              value={subtaskInput}
-                              onChange={(e) => setSubtaskInput(e.target.value)}
-                            />
-                          </div>
-                          <button
-                            type="submit"
-                            className="todo-add-btn todo-add-subtask-btn todo-add-subtask-btn-small"
-                            disabled={!subtaskInput.trim()}
-                          >
-                            Add
-                          </button>
-                        </form>
                       </div>
                     )}
                   </li>
