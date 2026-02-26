@@ -634,6 +634,25 @@ textarea {
 }
 
 /* Empty placeholder for chevron column; same dimensions as .todo-expand-btn for identical grid geometry */
+/* Wrapper for mobile first row; desktop uses display: contents so grid sees same 4 columns */
+.todo-item-first-row {
+  display: contents;
+}
+
+/* Mobile-only row actions (+ and trash); hidden on desktop */
+.todo-mobile-row-actions {
+  display: none;
+}
+
+/* Mobile-only delete (icon); hidden on desktop */
+.todo-delete-btn-mobile {
+  display: none;
+}
+
+.todo-delete-btn-icon {
+  display: block;
+}
+
 .todo-chevron-slot {
   display: block;
   width: 44px;
@@ -993,6 +1012,222 @@ textarea {
 .todo-delete-btn:hover {
   border-color: var(--text-color);
   color: var(--text-color);
+}
+
+/* Placeholder for subtask form (checkbox-width space on mobile); hidden on desktop */
+.todo-subtask-form-placeholder {
+  display: none;
+}
+
+/* ---------- Mobile task list (max-width: 768px): inline chevron, no Add subtask row, + opens input ---------- */
+@media (max-width: 768px) {
+  /* Parent task: flex column; first row = checkbox + chevron? + title + actions */
+  .todo-item:not(.todo-subtask-item) {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    grid-template-columns: unset;
+  }
+
+  /* Remove standalone "Add subtask" row */
+  .todo-item:not(.todo-subtask-item) > .todo-actions {
+    display: none;
+  }
+
+  .todo-item-first-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  /* Order: checkbox, chevron, content, actions. No empty left column. */
+  .todo-item-first-row .todo-checkbox {
+    order: 1;
+    flex-shrink: 0;
+  }
+  .todo-item-first-row .todo-expand-btn {
+    order: 2;
+    min-width: 18px;
+    width: 18px;
+    min-height: 18px;
+    padding: 0;
+    flex-shrink: 0;
+  }
+  .todo-item-first-row .todo-chevron-slot {
+    display: none;
+  }
+  .todo-item-first-row .todo-content {
+    order: 3;
+    flex: 1;
+    min-width: 0;
+  }
+  .todo-item-first-row .todo-mobile-row-actions {
+    order: 4;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  /* Two-line parent: title then "X/Y subtasks" (muted, small) */
+  .todo-item-first-row .todo-title-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .todo-item-first-row .todo-title {
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    word-break: normal;
+  }
+
+  .todo-item-first-row .subtask-fraction {
+    font-size: 12px;
+    margin-top: 0;
+    color: var(--muted-text-color);
+    opacity: 0.9;
+  }
+
+  .todo-item-first-row .subtask-fraction::after {
+    content: " subtasks";
+  }
+
+  /* + button (mobile only) */
+  .todo-add-subtask-plus-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    min-width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--muted-text-color);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: color 150ms ease, border-color 150ms ease;
+  }
+
+  .todo-add-subtask-plus-btn:hover {
+    color: var(--text-color);
+    border-color: var(--text-color);
+  }
+
+  .todo-delete-btn-mobile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    min-width: 32px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--subtle-text-color);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .todo-delete-btn-mobile:hover {
+    color: var(--text-color);
+    border-color: var(--text-color);
+  }
+
+  .todo-delete-btn-desktop {
+    display: none;
+  }
+
+  /* Subtask: indented 12–16px, checkbox + title + trash, no chevron */
+  .todo-subtask-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    padding-left: 16px;
+    min-height: 40px;
+    grid-template-columns: unset;
+  }
+
+  .todo-subtask-item .todo-chevron-slot {
+    display: none;
+  }
+
+  .todo-subtask-item .todo-subtask-main {
+    flex: 1;
+    min-width: 0;
+    grid-column: unset;
+    padding-left: 0;
+  }
+
+  .todo-subtask-item .todo-subtask-main .todo-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .todo-subtask-item .todo-subtask-main .todo-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .todo-subtask-item .todo-actions {
+    flex-shrink: 0;
+  }
+
+  /* Subtask form: hidden by default; shown only when .todo-subtask-form-mobile-open (after "+" tap) */
+  .todo-subtask-form {
+    display: none;
+    grid-template-columns: unset;
+  }
+
+  .todo-subtask-form.todo-subtask-form-mobile-open {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    padding-left: 16px;
+  }
+
+  .todo-subtask-form.todo-subtask-form-mobile-open .todo-chevron-slot {
+    display: none;
+  }
+
+  .todo-subtask-form-placeholder {
+    display: block;
+    width: 28px;
+    min-width: 28px;
+    flex-shrink: 0;
+  }
+
+  .todo-subtask-form .todo-subtask-input-cell {
+    flex: 1;
+    min-width: 0;
+    padding-left: 0;
+    grid-column: unset;
+  }
+
+  .todo-subtask-form .todo-add-subtask-btn-small {
+    flex-shrink: 0;
+    max-width: 72px;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .todo-subtasks {
+    grid-column: unset;
+  }
 }
 
 .empty-state {

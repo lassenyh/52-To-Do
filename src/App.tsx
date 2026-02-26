@@ -495,6 +495,8 @@ function App() {
   const [taskSegment, setTaskSegment] = useState<"todo" | "completed">("todo");
   const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
   const [subtaskInput, setSubtaskInput] = useState("");
+  /** Mobile only: which parent has the subtask input row visible (after "+" tap). */
+  const [mobileSubtaskInputTaskId, setMobileSubtaskInputTaskId] = useState<string | null>(null);
   const addSubtaskInputRef = useRef<HTMLInputElement>(null);
   const [joinWeekSnapshot, setJoinWeekSnapshot] = useState<{
     joinWeek: number;
@@ -990,25 +992,6 @@ function App() {
           joinWeek={yearMetrics.joinWeek}
         />
         <section className="dashboard" aria-label="Progress overview">
-          <article className="stat-card">
-            <div className="stat-label">Tasks completed</div>
-            <div className="stat-primary">
-              <div className="stat-value">{completedLabel}</div>
-              <div className="stat-secondary">{completedPercentLabel}</div>
-            </div>
-            <div className="progress-track" aria-hidden="true">
-              <div
-                className="progress-bar"
-                style={{ width: `${tasksPercentage}%` }}
-              />
-            </div>
-            <div className="stat-helper">
-              {tasksCompleted === 0
-                ? "One task a week is 52 by year's end."
-                : "The total tasks you can complete from when you started until year-end."}
-            </div>
-          </article>
-
           <article
             className={
               "stat-card stat-card-ratio" +
@@ -1041,6 +1024,25 @@ function App() {
                 : onPace
                   ? "Momentum is on your side."
                   : "A focused week puts you back on track."}
+            </div>
+          </article>
+
+          <article className="stat-card">
+            <div className="stat-label">Tasks completed</div>
+            <div className="stat-primary">
+              <div className="stat-value">{completedLabel}</div>
+              <div className="stat-secondary">{completedPercentLabel}</div>
+            </div>
+            <div className="progress-track" aria-hidden="true">
+              <div
+                className="progress-bar"
+                style={{ width: `${tasksPercentage}%` }}
+              />
+            </div>
+            <div className="stat-helper">
+              {tasksCompleted === 0
+                ? "One task a week is 52 by year's end."
+                : "The total tasks you can complete from when you started until year-end."}
             </div>
           </article>
         </section>
@@ -1117,55 +1119,88 @@ function App() {
                       (subtasks.length > 0 ? " todo-item-has-subtasks" : "")
                     }
                   >
-                    {subtasks.length > 0 ? (
+                    <div className="todo-item-first-row">
+                      {subtasks.length > 0 ? (
+                        <button
+                          type="button"
+                          className="todo-expand-btn"
+                          aria-expanded={isExpanded}
+                          aria-label={isExpanded ? "Collapse subtasks" : "Expand subtasks"}
+                          onClick={() => {
+                            setExpandedTaskId((id) => (id === task.id ? null : task.id));
+                            if (expandedTaskId === task.id) setMobileSubtaskInputTaskId((mid) => (mid === task.id ? null : mid));
+                            if (expandedTaskId !== task.id) setSubtaskInput("");
+                          }}
+                        >
+                          <span className={"todo-chevron" + (isExpanded ? " todo-chevron-open" : "")}>▸</span>
+                        </button>
+                      ) : (
+                        <span className="todo-chevron-slot" aria-hidden />
+                      )}
                       <button
                         type="button"
-                        className="todo-expand-btn"
-                        aria-expanded={isExpanded}
-                        aria-label={isExpanded ? "Collapse subtasks" : "Expand subtasks"}
-                        onClick={() => {
-                          setExpandedTaskId((id) => (id === task.id ? null : task.id));
-                          if (expandedTaskId !== task.id) setSubtaskInput("");
-                        }}
+                        className="todo-checkbox"
+                        aria-pressed={isCompleted}
+                        onClick={() => handleToggleCompleted(task.id)}
                       >
-                        <span className={"todo-chevron" + (isExpanded ? " todo-chevron-open" : "")}>▸</span>
-                      </button>
-                    ) : (
-                      <span className="todo-chevron-slot" aria-hidden />
-                    )}
-                    <button
-                      type="button"
-                      className="todo-checkbox"
-                      aria-pressed={isCompleted}
-                      onClick={() => handleToggleCompleted(task.id)}
-                    >
-                      <span
-                        className={
-                          "todo-checkbox-visual" +
-                          (isCompleted ? " todo-checkbox-visual-completed" : "")
-                        }
-                      >
-                        {isCompleted && (
-                          <span className="todo-checkbox-check">✓</span>
-                        )}
-                      </span>
-                    </button>
-
-                    <div className="todo-content">
-                      <div className="todo-title-row">
-                        <div
+                        <span
                           className={
-                            "todo-title" +
-                            (isCompleted ? " todo-title-completed" : "")
+                            "todo-checkbox-visual" +
+                            (isCompleted ? " todo-checkbox-visual-completed" : "")
                           }
                         >
-                          {task.title}
+                          {isCompleted && (
+                            <span className="todo-checkbox-check">✓</span>
+                          )}
+                        </span>
+                      </button>
+
+                      <div className="todo-content">
+                        <div className="todo-title-row">
+                          <div
+                            className={
+                              "todo-title" +
+                              (isCompleted ? " todo-title-completed" : "")
+                            }
+                          >
+                            {task.title}
+                          </div>
+                          {subtasks.length > 0 && (
+                            <span className="subtask-fraction" aria-hidden>
+                              {subtasks.filter((s) => s.completed).length}/{subtasks.length}
+                            </span>
+                          )}
                         </div>
-                        {subtasks.length > 0 && (
-                          <span className="subtask-fraction" aria-hidden>
-                            {subtasks.filter((s) => s.completed).length}/{subtasks.length}
-                          </span>
-                        )}
+                      </div>
+
+                      <div className="todo-mobile-row-actions">
+                        <button
+                          type="button"
+                          className="todo-add-subtask-plus-btn"
+                          aria-label="Add subtask"
+                          onClick={() => {
+                            if (!isExpanded) setExpandedTaskId(task.id);
+                            setMobileSubtaskInputTaskId(task.id);
+                            setSubtaskInput("");
+                            requestAnimationFrame(() => setTimeout(() => addSubtaskInputRef.current?.focus(), 0));
+                          }}
+                        >
+                          <span aria-hidden>+</span>
+                        </button>
+                        <button
+                          type="button"
+                          className="todo-delete-btn todo-delete-btn-mobile"
+                          onClick={() => handleDelete(task.id)}
+                          aria-label="Delete task"
+                        >
+                          <svg className="todo-delete-btn-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                            <path d="M3 6h18" />
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                            <line x1="10" y1="11" x2="10" y2="17" />
+                            <line x1="14" y1="11" x2="14" y2="17" />
+                          </svg>
+                        </button>
                       </div>
                     </div>
 
@@ -1186,7 +1221,7 @@ function App() {
                       </button>
                       <button
                         type="button"
-                        className="todo-delete-btn"
+                        className="todo-delete-btn todo-delete-btn-desktop"
                         onClick={() => handleDelete(task.id)}
                       >
                         Delete
@@ -1254,14 +1289,19 @@ function App() {
                           ))}
                         </ul>
                         <form
-                          className="todo-subtask-form"
+                          className={
+                            "todo-subtask-form" +
+                            (mobileSubtaskInputTaskId === task.id ? " todo-subtask-form-mobile-open" : "")
+                          }
                           onSubmit={(e) => {
                             e.preventDefault();
                             handleAddSubtask(task.id, subtaskInput);
                             setSubtaskInput("");
+                            setMobileSubtaskInputTaskId(null);
                           }}
                         >
                           <span className="todo-chevron-slot" aria-hidden />
+                          <span className="todo-subtask-form-placeholder" aria-hidden />
                           <div className="todo-subtask-input-cell">
                             <input
                               ref={expandedTaskId === task.id ? addSubtaskInputRef : undefined}
