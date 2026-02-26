@@ -19,16 +19,16 @@ export default defineConfig({
         start_url: "/",
         scope: "/",
         display: "standalone",
-        theme_color: "#0f1115",
-        background_color: "#0f1115",
+        theme_color: "#0f1f3d",
+        background_color: "#0f1f3d",
         icons: [
           {
-            src: "icons/icon-192.png",
+            src: "/pwa-192x192.png",
             sizes: "192x192",
             type: "image/png"
           },
           {
-            src: "icons/icon-512.png",
+            src: "/pwa-512x512.png",
             sizes: "512x512",
             type: "image/png"
           }
